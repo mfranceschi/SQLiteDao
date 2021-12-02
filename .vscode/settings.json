@@ -1,0 +1,6 @@
+{
+    "cmake.generator": "Unix Makefiles",
+    "cmake.configureArgs": ["-DCMAKE_MAKE_PROGRAM=C:\\msys64\\mingw64\\bin\\mingw32-make.exe"],
+    "editor.formatOnSave": true,
+    "files.insertFinalNewline": true
+}
