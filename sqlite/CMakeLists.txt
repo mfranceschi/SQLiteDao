@@ -1,0 +1,16 @@
+set(SQLITE_ZIP_PATH ${CMAKE_CURRENT_LIST_DIR}/sqlite-amalgamation-3370000.zip)
+set(SQLITE_UNZIPPED_PATH ${CMAKE_CURRENT_BINARY_DIR}/sqlite-amalgamation-3370000)
+
+if(NOT EXISTS ${SQLITE_UNZIPPED_PATH})
+  set(COMMAND_TO_RUN ${CMAKE_COMMAND} -E tar xf ${SQLITE_ZIP_PATH})# -C ${SQLITE_UNZIPPED_PATH})
+    execute_process(
+      COMMAND 
+        ${CMAKE_COMMAND} -E tar xf ${SQLITE_ZIP_PATH}
+      WORKING_DIRECTORY
+        ${CMAKE_CURRENT_BINARY_DIR}
+    )
+endif()
+
+file(GLOB SQLITE_SOURCES ${SQLITE_UNZIPPED_PATH}/*)
+add_library(SQLite STATIC ${SQLITE_SOURCES})
+target_include_directories(SQLite PUBLIC ${SQLITE_UNZIPPED_PATH})
