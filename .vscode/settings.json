@@ -5,6 +5,8 @@
   ],
   "editor.formatOnSave": true,
   "files.insertFinalNewline": true,
+  "clang-tidy.buildPath": "build",
+
   "files.associations": {
     "array": "cpp",
     "atomic": "cpp",
