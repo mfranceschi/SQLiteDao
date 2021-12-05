@@ -9,7 +9,7 @@
 // Thanks to https://zetcode.com/db/sqlitec/ for the helping code!
 
 void quickstart() {
-  ConnectedDatabase db = DatabaseConnectionFactory::open();
+  ConnectedDatabase db = DatabaseConnectionFactory::openFile("xyx");
 
   std::string sql = "DROP TABLE IF EXISTS Cars;"
                     "CREATE TABLE Cars(Id INT, Name TEXT, Price INT);"
