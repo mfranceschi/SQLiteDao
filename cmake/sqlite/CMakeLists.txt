@@ -7,6 +7,7 @@ add_library(
   SQLite STATIC
   ${sqlite_fetched_SOURCE_DIR}/sqlite3.c
   ${sqlite_fetched_SOURCE_DIR}/sqlite3.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/IncludeSQLite.hpp
 )
 target_include_directories(SQLite 
   PUBLIC 

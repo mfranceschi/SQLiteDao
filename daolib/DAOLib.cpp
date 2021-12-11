@@ -1,6 +1,4 @@
 #include "DAOLib.hpp"
-#include "ConnectedDatabaseFactory.hpp"
-#include "IncludeSQLite.hpp"
 #include <cstdio>
 #include <functional>
 #include <stdexcept>
@@ -8,8 +6,10 @@
 
 // Thanks to https://zetcode.com/db/sqlitec/ for the helping code!
 
+#include "SQLiteCpp/SQLiteCpp.h"
+
 void quickstart() {
-  ConnectedDatabase db = DatabaseConnectionFactory::openFile(":memory:");
+  SQLite::Database db("aaa.sqlite", SQLite::OPEN_CREATE | SQLite::OPEN_READWRITE);
 
   std::string sql = "DROP TABLE IF EXISTS Cars;"
                     "CREATE TABLE Cars(Id INT, Name TEXT, Price INT);"
@@ -21,13 +21,18 @@ void quickstart() {
                     "INSERT INTO Cars VALUES(6, 'Citroen', 21000);"
                     "INSERT INTO Cars VALUES(7, 'Hummer', 41400);"
                     "INSERT INTO Cars VALUES(8, 'Volkswagen', 21600);";
-  db.runSimpleQuery(sql);
+  db.exec(sql);
 
   std::string sql2 = "SELECT * FROM Cars";
-  db.runWithCallback(sql2, [](const std::vector<std::string> &row) {
-    for (const std::string &string : row) {
+  SQLite::Statement query2(db, sql2);
+  while (query2.executeStep()) {
+    std::string a = query2.getColumn(0);
+    std::string b = query2.getColumn(1);
+    std::string c = query2.getColumn(2);
+    for (const std::string &string :
+         {query2.getColumn(0), query2.getColumn(1), query2.getColumn(2)}) {
       printf("- %s ", string.c_str());
     }
     printf("\n");
-  });
+  }
 }
