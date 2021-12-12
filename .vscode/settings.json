@@ -54,6 +54,17 @@
     "streambuf": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "sstream": "cpp"
-  }
+    "sstream": "cpp",
+    "forward_list": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "unordered_set": "cpp",
+    "optional": "cpp",
+    "fstream": "cpp",
+    "iomanip": "cpp",
+    "iostream": "cpp",
+    "istream": "cpp"
+  },
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2
 }

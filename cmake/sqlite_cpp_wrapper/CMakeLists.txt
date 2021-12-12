@@ -13,7 +13,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(sqlitecpp_fetched)
 
 # Define interface SQLite that we actually use in the project.
-add_library(
-    SQLite_Cpp_Wrapper INTERFACE
-)
-target_link_libraries(SQLite_Cpp_Wrapper INTERFACE SQLiteCpp )
+add_library(SQLite_Cpp_Wrapper ALIAS SQLiteCpp)
