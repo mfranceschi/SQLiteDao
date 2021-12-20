@@ -66,5 +66,6 @@
     "istream": "cpp"
   },
   "editor.insertSpaces": true,
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "python.formatting.provider": "autopep8"
 }
