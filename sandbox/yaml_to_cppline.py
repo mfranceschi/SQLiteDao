@@ -1,20 +1,51 @@
+import argparse
+from pathlib import Path
+import sys
 
-import yaml
-import pathlib
 from cpp_code_writer import CppCodeGenerator
-
 from yaml_parser import parse
 
-yaml_file = pathlib.Path(__file__).parent / "simple-yaml.yaml"
-cpp_file_to_write = pathlib.Path(__file__).parent / "new_cpp_lib" / "Xyz.cpp"
+assert sys.version_info >= (3, 9), "You need at least Python 3.9"
 
 
-with open(yaml_file, mode="r") as f:
-    yamlContent = parse(yaml.load(f, Loader=yaml.Loader))
-print(yamlContent)
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description='Generate CPP code from YAML file for SQLite DAO.')
+    parser.add_argument(
+        '--yaml_file',
+        metavar="yaml_file",
+        type=str,
+        required=False,  # TODO true
+        default=str(Path(__file__).parent / "simple-yaml.yaml"),
+        help='Source YAML file (read-only)')
+    parser.add_argument(
+        '--path_to_write',
+        metavar="path_to_write",
+        type=str,
+        required=False,  # TODO true
+        default=str(Path(__file__).parent / "new_cpp_lib" / "Xyz"),
+        help='We will write the CPP files in this folder.')
 
-cpp_code = CppCodeGenerator(yamlContent).generate()
-print(cpp_code)
+    return parser.parse_args()
 
-with open(cpp_file_to_write, "w") as f:
-    f.write(cpp_code)
+
+def main():
+    arguments = parse_args()
+    yaml_file: Path = Path(arguments.yaml_file).absolute()
+    assert yaml_file.exists(), "Couldn't find the YAML file. Please prefer absolute paths."
+
+    cpp_file_to_write: str = arguments.path_to_write
+
+    yaml_content = parse(yaml_file)
+
+    cpp_code = CppCodeGenerator(yaml_content).generate()
+    print(*[code.content for code in cpp_code])
+
+    for file in cpp_code:
+        file_name_to_write = str(cpp_file_to_write) + file.suffix
+        with open(file_name_to_write, "w") as f:
+            f.write(file.content)
+
+
+if __name__ == "__main__":
+    main()

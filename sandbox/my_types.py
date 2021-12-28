@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass
-from typing import List, Literal, Union
+from typing import Any, List, Literal, Optional, Union
 
 Case_t = Union[
     Literal["PascalCase"],
@@ -21,6 +21,8 @@ class GeneralConfigs:
 class ColumnFromYaml:
     name: str
     type: ColumnType_t
+    nullable: Optional[bool] = False
+    default_value: Optional[Any] = None
 
 
 @dataclass
@@ -34,3 +36,9 @@ class TableFromYaml:
 class YamlFile:
     generalConfigs: GeneralConfigs
     tables: List[TableFromYaml]
+
+
+@dataclass
+class GeneratedFileToWrite:
+    suffix: str
+    content: Union[str, list[str]]

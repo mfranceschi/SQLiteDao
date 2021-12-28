@@ -16,3 +16,22 @@ tables:
     write_queries:
       - common: persistRecord
       - common: deleteById
+  - name: People
+    fields: 
+      - name: id
+        type: integer
+      - name: name
+        type: text
+      - name: age
+        type: integer
+        nullable: true
+      - name: has_car
+        type: boolean
+        default_value: true
+    primary_key: id
+    read_queries:
+      - common: listAll
+      - common: getById
+    write_queries:
+      - common: persistRecord
+      - common: deleteById
