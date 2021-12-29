@@ -42,3 +42,8 @@ class YamlFile:
 class GeneratedFileToWrite:
     suffix: str
     content: Union[str, list[str]]
+
+
+@dataclass
+class AnyTypeWithName:
+    name: str

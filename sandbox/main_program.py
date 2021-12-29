@@ -2,7 +2,8 @@ import argparse
 from pathlib import Path
 import sys
 
-from cpp_code_writer import CppCodeGenerator
+from cpp_code_generator import CppCodeGenerator
+from cmake_file_generator import CMake_File_Generator
 from yaml_parser import parse
 
 assert sys.version_info >= (3, 9), "You need at least Python 3.9"
@@ -40,6 +41,10 @@ def main():
 
     cpp_code = CppCodeGenerator(yaml_content).generate()
     print(*[code.content for code in cpp_code])
+
+    cmake_code = CMake_File_Generator(
+        files_to_compile=[str(cpp_file_to_write) + cpp_file.suffix for cpp_file in cpp_code]).generate()
+    print(cmake_code[0].content)
 
     for file in cpp_code:
         file_name_to_write = str(cpp_file_to_write) + file.suffix
