@@ -21,8 +21,12 @@ def check_names_are_unique_and_correct_chars(list_of_objects_with_names: list[An
 
 def parse(yaml_file_name: PathLike) -> YamlFile:
     with open(yaml_file_name, "r") as f:
-        yamlAsDict = yaml.load(f, Loader=yaml.Loader)
-    general_config = GeneralConfigs(case=yamlAsDict["case"])
+        yamlAsDict: dict[dict] = yaml.load(f, Loader=yaml.Loader)
+
+    general_config = GeneralConfigs(
+        case=yamlAsDict["case"],
+        name=yamlAsDict.get("name")
+    )
 
     tables: List[TableFromYaml] = []
 

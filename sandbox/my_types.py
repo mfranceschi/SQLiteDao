@@ -15,6 +15,7 @@ ColumnType_t = Union[Literal["integer"], Literal["text"]]
 @dataclass
 class GeneralConfigs:
     case: Case_t = "PascalCase"
+    name: Optional[str] = None
 
 
 @dataclass
@@ -40,7 +41,7 @@ class YamlFile:
 
 @dataclass
 class GeneratedFileToWrite:
-    suffix: str
+    file_name: str
     content: Union[str, list[str]]
 
 

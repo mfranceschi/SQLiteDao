@@ -14,13 +14,14 @@ class CMake_File_Generator(Abstract_File_Generator):
         self.files_to_compile = [Path(file).name for file in files_to_compile]
 
     def generate(self) -> list[GeneratedFileToWrite]:
+        file_content = self._generate_impl(
+            static_library_name=STATIC_LIBRARY_NAME,
+            static_libs_to_link_to=[STATIC_LIB_TO_LINK_TO],
+            file_paths=self.files_to_compile
+        )
         generated_file = GeneratedFileToWrite(
-            suffix=".cmake",
-            content=self._generate_impl(
-                static_library_name=STATIC_LIBRARY_NAME,
-                static_libs_to_link_to=[STATIC_LIB_TO_LINK_TO],
-                file_paths=self.files_to_compile
-            )
+            file_name="CMakeLists.txt",
+            content=file_content
         )
         return [generated_file]
 

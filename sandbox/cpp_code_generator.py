@@ -38,9 +38,10 @@ class _Helpers:
 
 class CppCodeGenerator:
 
-    def __init__(self, yaml_data: YamlFile) -> None:
+    def __init__(self, yaml_data: YamlFile, file_name: str) -> None:
         self.yaml_data = yaml_data
         self.includes: list[str] = [f'#include "{HEADER_TO_INCLUDE}"']
+        self.file_name = file_name
 
     def generate(self) -> list[GeneratedFileToWrite]:
         # Generate definitions of classes for tables
@@ -63,7 +64,14 @@ class CppCodeGenerator:
             "\n" * len(NAMESPACES)
         )
 
-        return [GeneratedFileToWrite(suffix=".hpp", content="\n\n".join(texts))]
+        generated_file_name = "{}.hpp".format(
+            self.yaml_data.generalConfigs.name if self.yaml_data.generalConfigs.name else self.file_name
+        )
+        generated_file = GeneratedFileToWrite(
+            file_name=generated_file_name,
+            content="\n\n".join(texts)
+        )
+        return [generated_file]
 
     def _make_table_class_definition(self, table_from_yaml: TableFromYaml, configs: GeneralConfigs):
 

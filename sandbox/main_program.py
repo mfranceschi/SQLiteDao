@@ -1,4 +1,5 @@
 import argparse
+import logging
 from pathlib import Path
 import sys
 
@@ -20,11 +21,11 @@ def parse_args() -> argparse.Namespace:
         default=str(Path(__file__).parent / "simple-yaml.yaml"),
         help='Source YAML file (read-only)')
     parser.add_argument(
-        '--path_to_write',
-        metavar="path_to_write",
+        '--output_folder',
+        metavar="output_folder",
         type=str,
         required=False,  # TODO true
-        default=str(Path(__file__).parent / "new_cpp_lib" / "Xyz"),
+        default=str(Path(__file__).parent / "new_cpp_lib"),
         help='We will write the CPP files in this folder.')
 
     return parser.parse_args()
@@ -32,25 +33,41 @@ def parse_args() -> argparse.Namespace:
 
 def main():
     arguments = parse_args()
+
+    # Check YAML file exists
     yaml_file: Path = Path(arguments.yaml_file).absolute()
-    assert yaml_file.exists(), "Couldn't find the YAML file. Please prefer absolute paths."
+    assert yaml_file.exists(), "Couldn't find the YAML file. Please use absolute paths."
 
-    cpp_file_to_write: str = arguments.path_to_write
+    # Check output folder is okay
+    output_folder = Path(arguments.output_folder)
+    if not output_folder.is_dir():
+        assert not output_folder.exists(), "Output folder exists and is not a directory."
+        output_folder.mkdir()
 
+    # Parse the YAML file
     yaml_content = parse(yaml_file)
 
-    cpp_code = CppCodeGenerator(yaml_content).generate()
-    print(*[code.content for code in cpp_code])
+    # C++ code generation
+    generated_cpp_files = CppCodeGenerator(
+        yaml_content, file_name=yaml_file.with_suffix("").name
+    ).generate()
+    logging.debug("Generated C++ files: %s", generated_cpp_files)
 
-    cmake_code = CMake_File_Generator(
-        files_to_compile=[str(cpp_file_to_write) + cpp_file.suffix for cpp_file in cpp_code]).generate()
-    print(cmake_code[0].content)
+    # CMake code generation
+    generated_cmake_files = CMake_File_Generator(
+        files_to_compile=[
+            output_folder / cpp_file.file_name for cpp_file in generated_cpp_files
+        ]
+    ).generate()
+    logging.debug("Generated CMake files: %s", generated_cmake_files)
 
-    for file in cpp_code:
-        file_name_to_write = str(cpp_file_to_write) + file.suffix
+    # Writing files
+    for file in [*generated_cpp_files, *generated_cmake_files]:
+        file_name_to_write = output_folder / file.file_name
         with open(file_name_to_write, "w") as f:
             f.write(file.content)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()
