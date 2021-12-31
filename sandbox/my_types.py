@@ -44,6 +44,9 @@ class GeneratedFileToWrite:
     file_name: str
     content: Union[str, list[str]]
 
+    def __repr__(self) -> str:
+        return f"GeneratedFileToWrite(file_name='{self.file_name}', content=str of length {len(self.content)})"
+
 
 @dataclass
 class AnyTypeWithName:

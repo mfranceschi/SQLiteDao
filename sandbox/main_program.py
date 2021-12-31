@@ -1,10 +1,10 @@
 import argparse
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 
-from cpp_code_generator import CppCodeGenerator
 from cmake_file_generator import CMake_File_Generator
+from cpp_code_generator import CppCodeGenerator
 from yaml_parser import parse
 
 assert sys.version_info >= (3, 9), "You need at least Python 3.9"
@@ -15,14 +15,14 @@ def parse_args() -> argparse.Namespace:
         description='Generate CPP code from YAML file for SQLite DAO.')
     parser.add_argument(
         '--yaml_file',
-        metavar="yaml_file",
+        # metavar="yaml_file",
         type=str,
         required=False,  # TODO true
         default=str(Path(__file__).parent / "simple-yaml.yaml"),
         help='Source YAML file (read-only)')
     parser.add_argument(
         '--output_folder',
-        metavar="output_folder",
+        # metavar="output_folder",
         type=str,
         required=False,  # TODO true
         default=str(Path(__file__).parent / "new_cpp_lib"),

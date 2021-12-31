@@ -1,4 +1,5 @@
 from abc import abstractmethod
+
 from my_types import GeneratedFileToWrite
 
 

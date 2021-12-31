@@ -1,9 +1,9 @@
 
+from os import PathLike
+from pathlib import Path
+
 from abstract_file_generator import Abstract_File_Generator
 from my_types import GeneratedFileToWrite
-
-from pathlib import Path
-from os import PathLike
 
 STATIC_LIBRARY_NAME = "GeneratedSQLiteCodeClassesByMyMagicDAO"
 STATIC_LIB_TO_LINK_TO = "MyMartinBaseWrapper"

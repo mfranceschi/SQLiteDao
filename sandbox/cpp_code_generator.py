@@ -1,6 +1,6 @@
 
-from my_types import Case_t, GeneralConfigs, GeneratedFileToWrite, TableFromYaml, YamlFile
-
+from my_types import (Case_t, GeneralConfigs, GeneratedFileToWrite,
+                      TableFromYaml, YamlFile)
 
 HEADER_TO_INCLUDE = "TheHeader.hpp"
 NAMESPACES: list[str] = []

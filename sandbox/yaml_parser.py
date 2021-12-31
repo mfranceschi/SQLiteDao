@@ -1,10 +1,10 @@
-from dataclasses import dataclass
 from os import PathLike
 from typing import List
 
 import yaml
 
-from my_types import AnyTypeWithName, ColumnFromYaml, GeneralConfigs, TableFromYaml, YamlFile
+from my_types import (AnyTypeWithName, ColumnFromYaml, GeneralConfigs,
+                      TableFromYaml, YamlFile)
 
 
 def check_names_are_unique_and_correct_chars(list_of_objects_with_names: list[AnyTypeWithName], error_prefixes: str):
