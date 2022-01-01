@@ -15,14 +15,12 @@ def parse_args() -> argparse.Namespace:
         description='Generate CPP code from YAML file for SQLite DAO.')
     parser.add_argument(
         '--yaml_file',
-        # metavar="yaml_file",
         type=str,
         required=False,  # TODO true
         default=str(Path(__file__).parent / "simple-yaml.yaml"),
         help='Source YAML file (read-only)')
     parser.add_argument(
         '--output_folder',
-        # metavar="output_folder",
         type=str,
         required=False,  # TODO true
         default=str(Path(__file__).parent / "new_cpp_lib"),
@@ -35,13 +33,17 @@ def main():
     arguments = parse_args()
 
     # Check YAML file exists
-    yaml_file: Path = Path(arguments.yaml_file).absolute()
-    assert yaml_file.exists(), "Couldn't find the YAML file. Please use absolute paths."
+    yaml_file = Path(arguments.yaml_file)
+    assert yaml_file.is_absolute(), "Please use absolute paths (for YAML)."
+    assert yaml_file.is_file(), "Couldn't find the YAML file."
+    yaml_file_name_no_ext = yaml_file.with_suffix("").name
 
     # Check output folder is okay
     output_folder = Path(arguments.output_folder)
-    if not output_folder.is_dir():
-        assert not output_folder.exists(), "Output folder exists and is not a directory."
+    assert output_folder.is_absolute(), "Please use absolute paths (for output folder)."
+    if output_folder.exists():
+        assert output_folder.is_dir(), "Output folder exists and is not a directory."
+    else:
         output_folder.mkdir()
 
     # Parse the YAML file
@@ -49,15 +51,16 @@ def main():
 
     # C++ code generation
     generated_cpp_files = CppCodeGenerator(
-        yaml_content, file_name=yaml_file.with_suffix("").name
+        yaml_content, file_name=yaml_file_name_no_ext
     ).generate()
+    generated_cpp_files_paths = [
+        output_folder / cpp_file.file_name for cpp_file in generated_cpp_files
+    ]
     logging.debug("Generated C++ files: %s", generated_cpp_files)
 
     # CMake code generation
     generated_cmake_files = CMake_File_Generator(
-        files_to_compile=[
-            output_folder / cpp_file.file_name for cpp_file in generated_cpp_files
-        ]
+        files_to_compile=generated_cpp_files_paths
     ).generate()
     logging.debug("Generated CMake files: %s", generated_cmake_files)
 

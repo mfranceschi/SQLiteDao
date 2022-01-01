@@ -1,10 +1,17 @@
-
+from dataclasses import dataclass
 from my_types import (Case_t, GeneralConfigs, GeneratedFileToWrite,
                       TableFromYaml, YamlFile)
 
-HEADER_TO_INCLUDE = "TheHeader.hpp"
-NAMESPACES: list[str] = []
+HEADER_TO_INCLUDE = "../TheHeader.hpp"
+NAMESPACES: list[str] = ["custom_ns"]
 PARENT_TABLE_CLASS = "AbstractTable"
+
+
+@dataclass
+class StatementData:
+    sql_statement: str
+    constant_string_name: str
+    method_name: str
 
 
 class _Helpers:
@@ -52,16 +59,19 @@ class CppCodeGenerator:
                 self.yaml_data.generalConfigs
             )
             table_class_definitions.append(table_class_def_text)
-        table_class_definitions_text = "\n\n".join(table_class_definitions)
+        table_class_definitions_text = "\n\n".join(self._make_table_class_definition(
+            table_from_yaml,
+            self.yaml_data.generalConfigs
+        ) for table_from_yaml in self.yaml_data.tables)
 
         # Gathering the includes later in case we have to add additional includes beforehands.
         includes_text = "\n".join(self.includes)
 
         texts = (
             includes_text,
-            "".join(f"namespace {ns} {{ \n" for ns in NAMESPACES),
+            "".join(f"namespace {ns} {{" for ns in NAMESPACES),
             table_class_definitions_text,
-            "\n" * len(NAMESPACES)
+            "}\n" * len(NAMESPACES)
         )
 
         generated_file_name = "{}.hpp".format(
@@ -87,30 +97,30 @@ class CppCodeGenerator:
         # TODO content of class
         text += "protected: \n"
 
+        statement_texts = []
+
         for statement in (
-            (
-                "CREATE_TABLE_STATEMENT",
-                _Helpers._create_table(table_from_yaml),
-                "getCreateTableStatement"
-            ),
-            (
-                "DROP_TABLE_IF_EXISTS_STATEMENT",
-                _Helpers._drop_table_if_exists(table_from_yaml.name),
-                "getDropTableIfExistsStatement"
-            ),
-            (
-                "DELETE_TABLE_STATEMENT",
-                _Helpers._drop_table_if_exists(table_from_yaml.name),
-                "getDeleteTableStatement"
-            ),
+            StatementData(
+                sql_statement=_Helpers._create_table(table_from_yaml),
+                constant_string_name="CREATE_TABLE_STATEMENT",
+                method_name="getCreateTableStatement"),
+            StatementData(
+                sql_statement=_Helpers._drop_table_if_exists(
+                    table_from_yaml.name),
+                constant_string_name="DROP_TABLE_IF_EXISTS_STATEMENT",
+                method_name="getDropTableIfExistsStatement"),
+            StatementData(
+                sql_statement=_Helpers._drop_table(table_from_yaml.name),
+                constant_string_name="DELETE_TABLE_STATEMENT",
+                method_name="getDeleteTableStatement"),
         ):
-            string_name = statement[0]
-            string_value = statement[1]
-            method_name = statement[2]
+            statement_texts.append(
+                f"""  static constexpr const char* {statement.constant_string_name} = \"{statement.sql_statement}\";
+  const char* {statement.method_name}() const override {{ return {statement.constant_string_name}; }}
+"""
+            )
 
-            text += f"static constexpr const char* {string_name} = \"{string_value}\"; \n"
-            text += f"const char* {method_name}() const override {{ return {string_name}; }}\n\n"
-
+        text += "\n".join(statement_texts)
         text += "};"
 
         return text

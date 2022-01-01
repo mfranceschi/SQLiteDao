@@ -17,6 +17,7 @@ tables:
     write_queries:
       - common: persistRecord
       - common: deleteById
+
   - name: People
     fields: 
       - name: id
