@@ -1,142 +1,78 @@
 #include "DAOLib.hpp"
-#include "sqlite3.h"
-#include <cstdio>
-#include <functional>
-#include <stdexcept>
-#include <vector>
+#include "CommonQueries.hpp"
+#include "SQLiteCpp/SQLiteCpp.h"
+#include "Types.hpp"
+#include <iostream>
 
 // Thanks to https://zetcode.com/db/sqlitec/ for the helping code!
 
-class ConnectedDatabase {
-private:
-  sqlite3 *db;
-  ConnectedDatabase(sqlite3 *db) : db(db) {}
-  friend class DatabaseConnectionFactory;
-
-  static int callbackHelper(void *modernCallbackPointer, int nbColumns,
-                            char **columnsContent, char **columnsName) {
-    const auto &callback =
-        *static_cast<ModernCallback_t *>(modernCallbackPointer);
-
-    std::vector<std::string> resultsAsVector(nbColumns);
-    for (int i = 0; i < nbColumns; i++) {
-      resultsAsVector[i] = columnsContent[i];
-    }
-
-    try {
-      callback(resultsAsVector);
-      return 0;
-    } catch (const std::exception &) {
-      return 1;
-    }
+struct CarsTable {
+  static const std::string TABLE_NAME;
+  static const std::vector<ColumnData> COLUMNS;
+  struct Row {
+    int Id;
+    std::string Name;
+    int Price;
+  };
+  Row readFromQuerySelectStar(SQLite::Statement &statement) {
+    return Row{statement.getColumn(0), statement.getColumn(1),
+               statement.getColumn(2)};
+  }
+  static std::string makeCreateTableQuery(bool dropIfExists = true) {
+    const std::string createTableQuery =
+        CommonQueries::createTable(TABLE_NAME, COLUMNS);
+    return dropIfExists
+               ? CommonQueries::dropTableIfExists(TABLE_NAME) + createTableQuery
+               : createTableQuery;
   }
 
-public:
-  ~ConnectedDatabase() { sqlite3_close(db); }
-
-  void runSimpleQuery(const std::string &query) {
-    char *errMessage = nullptr;
-    int rc = sqlite3_exec(db, query.c_str(), 0, 0, &errMessage);
-    if (rc != SQLITE_OK) {
-      throw std::runtime_error(errMessage);
-    }
+  static std::string makeInsertQuery() {
+    return "INSERT INTO Cars VALUES(?1, ?2, ?3);";
   }
 
-  using ModernCallback_t =
-      std::function<void(const std::vector<std::string> &)>;
+  static void bindRowToInsertStatement(const Row &row,
+                                       SQLite::Statement &statement) {
+    statement.bind(1, row.Id);
+    statement.bind(2, row.Name);
+    statement.bind(3, row.Price);
+  }
 
-  void runWithCallback(const std::string &query,
-                       ModernCallback_t modernCallback) {
-    char *errMessage = nullptr;
-    int rc = sqlite3_exec(db, query.c_str(), callbackHelper, &modernCallback,
-                          &errMessage);
-    if (rc != SQLITE_OK) {
-      throw std::runtime_error(errMessage);
+  static std::vector<Row> selectAll(SQLite::Database &db) {
+    std::vector<Row> result;
+
+    std::string sql = CommonQueries::selectAll(TABLE_NAME);
+    SQLite::Statement query(db, sql);
+    while (query.executeStep()) {
+      result.push_back(
+          Row{query.getColumn(0), query.getColumn(1), query.getColumn(2)});
     }
+    return result;
   }
 };
-
-class DatabaseConnectionFactory {
-private:
-  static ConnectedDatabase open_internal(const char *filename, int flags) {
-    sqlite3 *db;
-    int rc = sqlite3_open_v2(filename, &db, flags, nullptr);
-    if (rc == SQLITE_OK) {
-      return ConnectedDatabase(db);
-    } else {
-      throw std::runtime_error("failed to open db!");
-    }
-  }
-
-public:
-  static ConnectedDatabase open() {
-    return open_internal(":memory:",
-                         SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-  }
-
-  static ConnectedDatabase open(const std::string &filename) {
-    return open_internal(filename.c_str(), SQLITE_OPEN_READWRITE);
-  }
-
-  static ConnectedDatabase openOrCreate(const std::string &filename) {
-    return open_internal(filename.c_str(),
-                         SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-  }
-};
-
-int callback_display_cars(void *_unused, int argc, char **argv,
-                          char **colName) {
-  for (int i = 0; i < argc; i++) {
-
-    printf("%s = %s\n", colName[i], argv[i] ? argv[i] : "NULL");
-  }
-  return 0;
-}
+const std::string CarsTable::TABLE_NAME = "Cars";
+const std::vector<ColumnData> CarsTable::COLUMNS = std::vector<ColumnData>(
+    {ColumnData{"Id", ColumnType::INT}, ColumnData{"Name", ColumnType::TEXT},
+     ColumnData{"Price", ColumnType::INT}});
 
 void quickstart() {
-  ConnectedDatabase db = DatabaseConnectionFactory::open();
+  SQLite::Database db("aaa.sqlite",
+                      SQLite::OPEN_CREATE | SQLite::OPEN_READWRITE);
+  db.exec(CarsTable::makeCreateTableQuery());
 
-  std::string sql = "DROP TABLE IF EXISTS Cars;"
-                    "CREATE TABLE Cars(Id INT, Name TEXT, Price INT);"
-                    "INSERT INTO Cars VALUES(1, 'Audi', 52642);"
-                    "INSERT INTO Cars VALUES(2, 'Mercedes', 57127);"
-                    "INSERT INTO Cars VALUES(3, 'Skoda', 9000);"
-                    "INSERT INTO Cars VALUES(4, 'Volvo', 29000);"
-                    "INSERT INTO Cars VALUES(5, 'Bentley', 350000);"
-                    "INSERT INTO Cars VALUES(6, 'Citroen', 21000);"
-                    "INSERT INTO Cars VALUES(7, 'Hummer', 41400);"
-                    "INSERT INTO Cars VALUES(8, 'Volkswagen', 21600);";
-  db.runSimpleQuery(sql);
+  SQLite::Statement insertStatement(db, CarsTable::makeInsertQuery());
+  for (const CarsTable::Row &row :
+       {CarsTable::Row{1, "Audi", 52642}, CarsTable::Row{2, "Mercedes", 57127},
+        CarsTable::Row{3, "Skoda", 9000}, CarsTable::Row{4, "Volvo", 29000},
+        CarsTable::Row{5, "Bentley", 350000},
+        CarsTable::Row{6, "Citroen", 21000}, CarsTable::Row{7, "Hummer", 41400},
+        CarsTable::Row{8, "Volkswagen", 21600}}) {
+    CarsTable::bindRowToInsertStatement(row, insertStatement);
+    insertStatement.exec();
+    insertStatement.reset();
+  }
 
-  std::string sql2 = "SELECT * FROM Cars";
-  db.runWithCallback(sql2, [](const std::vector<std::string> &row) {
-    for (const std::string &string : row) {
-      printf("- %s ", string.c_str());
-    }
-    printf("\n");
-  });
-}
-
-void quickstart2() {
-  sqlite3 *db;
-  char *err_msg = 0;
-
-  int rc = sqlite3_open(":memory:", &db);
-  const char *sql = "DROP TABLE IF EXISTS Cars;"
-                    "CREATE TABLE Cars(Id INT, Name TEXT, Price INT);"
-                    "INSERT INTO Cars VALUES(1, 'Audi', 52642);"
-                    "INSERT INTO Cars VALUES(2, 'Mercedes', 57127);"
-                    "INSERT INTO Cars VALUES(3, 'Skoda', 9000);"
-                    "INSERT INTO Cars VALUES(4, 'Volvo', 29000);"
-                    "INSERT INTO Cars VALUES(5, 'Bentley', 350000);"
-                    "INSERT INTO Cars VALUES(6, 'Citroen', 21000);"
-                    "INSERT INTO Cars VALUES(7, 'Hummer', 41400);"
-                    "INSERT INTO Cars VALUES(8, 'Volkswagen', 21600);";
-  rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
-
-  const char *sql2 = "SELECT * FROM Cars";
-
-  rc = sqlite3_exec(db, sql2, callback_display_cars, 0, &err_msg);
-
-  rc = sqlite3_close(db);
+  for (const CarsTable::Row &row : CarsTable::selectAll(db)) {
+    std::cout << "- Car #" << row.Id << " \"" << row.Name
+              << "\" (price: " << row.Price << ")." << std::endl;
+  }
 }

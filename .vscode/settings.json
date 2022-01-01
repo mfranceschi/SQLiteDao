@@ -5,6 +5,8 @@
   ],
   "editor.formatOnSave": true,
   "files.insertFinalNewline": true,
+  "clang-tidy.buildPath": "build",
+
   "files.associations": {
     "array": "cpp",
     "atomic": "cpp",
@@ -51,6 +53,19 @@
     "stdexcept": "cpp",
     "streambuf": "cpp",
     "cinttypes": "cpp",
-    "typeinfo": "cpp"
-  }
+    "typeinfo": "cpp",
+    "sstream": "cpp",
+    "forward_list": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "unordered_set": "cpp",
+    "optional": "cpp",
+    "fstream": "cpp",
+    "iomanip": "cpp",
+    "iostream": "cpp",
+    "istream": "cpp"
+  },
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "python.formatting.provider": "autopep8"
 }
