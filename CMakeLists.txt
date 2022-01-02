@@ -14,3 +14,5 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/dependencies.cmake)
 add_subdirectory(daolib)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/generate_or_update_dao/function_generate_or_update_dao.cmake)
+
+add_subdirectory(tests)
