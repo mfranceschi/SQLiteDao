@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--output_folder',
         type=str,
-        required=False,  # TODO true
+        required=True,  # TODO true
         default=str(Path(__file__).parent / "new_cpp_lib"),
         help='We will write the CPP file(s) in this folder.')
 

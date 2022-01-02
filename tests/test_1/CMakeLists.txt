@@ -5,3 +5,4 @@ generate_or_update_dao(
 
 add_executable(test_1_exec)
 target_sources(test_1_exec PRIVATE main.cpp)
+target_link_libraries(test_1_exec PRIVATE MyLibA)

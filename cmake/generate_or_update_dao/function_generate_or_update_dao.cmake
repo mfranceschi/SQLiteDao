@@ -20,8 +20,11 @@ function(GENERATE_OR_UPDATE_DAO)
   get_filename_component(YAML_FILE_WE ${THIS_ARGS_YAML_FILE} NAME_WE)
   set(CPP_FILE_OF_CURRENT_YAML ${USER_DAO_LIB_OUTPUT_FOLDER}/${YAML_FILE_WE}.hpp)
   if (${THIS_ARGS_YAML_FILE} IS_NEWER_THAN ${CPP_FILE_OF_CURRENT_YAML})
+    message("YAML is newer than C++ file, generating.")
+    set(_COMMAND ${Python3_EXECUTABLE} ${SQLiteDAO_PYTHON_ENTRY_POINT} --yaml_file=${THIS_ARGS_YAML_FILE} --output_folder=${USER_DAO_LIB_OUTPUT_FOLDER})
     execute_process(
-      COMMAND Python3::Interpreter main_program.py --yaml_file=${THIS_ARGS_YAML_FILE} --output_folder=${USER_DAO_LIB_OUTPUT_FOLDER}
+      COMMAND ${_COMMAND}
+      COMMAND_ERROR_IS_FATAL ANY
     )
   endif()
   list(APPEND USER_DAO_LIB_CPP_FILES ${CPP_FILE_OF_CURRENT_YAML})
