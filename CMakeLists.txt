@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(SQLiteDAO LANGUAGES C CXX)
 
 find_package(
@@ -9,5 +9,8 @@ find_package(
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_subdirectory(cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/dependencies.cmake)
+
 add_subdirectory(daolib)
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/function_generate_or_update_dao.cmake)
