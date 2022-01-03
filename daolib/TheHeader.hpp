@@ -1,5 +1,4 @@
 #include "SQLiteCpp/SQLiteCpp.h"
-#include <string>
 
 class AbstractTable {
 public:
@@ -9,8 +8,6 @@ public:
       statement += this->getDropTableIfExistsStatement();
     }
     statement += this->getCreateTableStatement();
-
-    std::printf("Sql statement: %s\n", statement.c_str());
 
     db.exec(statement);
   }
@@ -34,7 +31,6 @@ protected:
 class MfDao {
 public:
   static MfDao open(const std::string &file) {
-    SQLite::Database::getHeaderInfo(file);
     return MfDao(
         SQLite::Database(file, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE));
   }
