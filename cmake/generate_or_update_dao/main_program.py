@@ -3,9 +3,8 @@ import logging
 import sys
 from pathlib import Path
 
-from cmake_file_generator import CMake_File_Generator
-from cpp_code_generator import CppCodeGenerator
-from yaml_parser import parse
+from python_implems.cpp_code_generator import CppCodeGenerator
+from python_implems.yaml_parser import parse
 
 assert sys.version_info >= (3, 9), "You need at least Python 3.9"
 
@@ -22,9 +21,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--output_folder',
         type=str,
-        required=False,  # TODO true
+        required=True,  # TODO true
         default=str(Path(__file__).parent / "new_cpp_lib"),
-        help='We will write the CPP files in this folder.')
+        help='We will write the CPP file(s) in this folder.')
 
     return parser.parse_args()
 
@@ -53,19 +52,10 @@ def main():
     generated_cpp_files = CppCodeGenerator(
         yaml_content, file_name=yaml_file_name_no_ext
     ).generate()
-    generated_cpp_files_paths = [
-        output_folder / cpp_file.file_name for cpp_file in generated_cpp_files
-    ]
     logging.debug("Generated C++ files: %s", generated_cpp_files)
 
-    # CMake code generation
-    generated_cmake_files = CMake_File_Generator(
-        files_to_compile=generated_cpp_files_paths
-    ).generate()
-    logging.debug("Generated CMake files: %s", generated_cmake_files)
-
     # Writing files
-    for file in [*generated_cpp_files, *generated_cmake_files]:
+    for file in generated_cpp_files:
         file_name_to_write = output_folder / file.file_name
         with open(file_name_to_write, "w") as f:
             f.write(file.content)

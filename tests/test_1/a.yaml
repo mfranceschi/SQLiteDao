@@ -1,5 +1,5 @@
 case: PascalCase
-# name: SimpleMyYamlEheH
+name: Test_1_Db
 
 tables:
   - name: Cars
@@ -12,11 +12,9 @@ tables:
         type: integer
     primary_key: id
     read_queries:
-      - common: listAll
-      - common: getById
+      predefined: [ listAll, countAll ]
     write_queries:
-      - common: persistRecord
-      - common: deleteById
+      predefined: [ persistRecord ]
 
   - name: People
     fields: 
@@ -31,9 +29,3 @@ tables:
         type: boolean
         default_value: true
     primary_key: id
-    read_queries:
-      - common: listAll
-      - common: getById
-    write_queries:
-      - common: persistRecord
-      - common: deleteById

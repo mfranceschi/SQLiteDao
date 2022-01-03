@@ -3,8 +3,8 @@ from typing import List
 
 import yaml
 
-from my_types import (AnyTypeWithName, ColumnFromYaml, GeneralConfigs,
-                      TableFromYaml, YamlFile)
+from .my_types import (AnyTypeWithName, ColumnFromYaml, GeneralConfigs,
+                       TableFromYaml, YamlFile)
 
 
 def check_names_are_unique_and_correct_chars(list_of_objects_with_names: list[AnyTypeWithName], error_prefixes: str):
@@ -25,12 +25,13 @@ def parse(yaml_file_name: PathLike) -> YamlFile:
 
     general_config = GeneralConfigs(
         case=yamlAsDict["case"],
-        name=yamlAsDict.get("name")
+        name=yamlAsDict.get("name", None)
     )
 
     tables: List[TableFromYaml] = []
 
     for table in yamlAsDict["tables"]:
+        table: dict
         table_name = table["name"]
         columns = [ColumnFromYaml(**column) for column in table["fields"]]
         check_names_are_unique_and_correct_chars(
@@ -42,7 +43,10 @@ def parse(yaml_file_name: PathLike) -> YamlFile:
             TableFromYaml(
                 name=table_name,
                 primary_key=table["primary_key"],
-                columns=columns
+                columns=columns,
+                predefined_read_queries=table.get(
+                    "read_queries", {}
+                ).get("predefined", [])
             )
         )
 

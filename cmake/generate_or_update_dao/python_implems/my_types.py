@@ -1,12 +1,16 @@
 
 from dataclasses import dataclass
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 Case_t = Union[
     Literal["PascalCase"],
     Literal["camelCase"],
     Literal["camelBack"],
     Literal["snake_case"]
+]
+PredefinedReadQueries_t = Union[
+    Literal["listAll"],
+    Literal["countAll"]
 ]
 
 ColumnType_t = Union[Literal["integer"], Literal["text"]]
@@ -27,16 +31,22 @@ class ColumnFromYaml:
 
 
 @dataclass
+class QueryFromYaml:
+    pass
+
+
+@dataclass
 class TableFromYaml:
     name: str
-    columns: List[ColumnFromYaml]
+    columns: list[ColumnFromYaml]
     primary_key: str
+    predefined_read_queries: list[PredefinedReadQueries_t]
 
 
 @dataclass
 class YamlFile:
     generalConfigs: GeneralConfigs
-    tables: List[TableFromYaml]
+    tables: list[TableFromYaml]
 
 
 @dataclass
