@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .my_types import (Case_t, GeneralConfigs, GeneratedFileToWrite,
                        TableFromYaml, YamlFile)
 
-HEADER_TO_INCLUDE = "../TheHeader.hpp"
+HEADER_TO_INCLUDE = "TheHeader.hpp"
 NAMESPACES: list[str] = ["custom_ns"]
 PARENT_TABLE_CLASS = "AbstractTable"
 
@@ -36,7 +36,7 @@ class _Helpers:
         )
         table_constraints = []
         if table_data.primary_key:
-            table_constraints.append(f"PRIMARY KEY {table_data.primary_key}")
+            table_constraints.append(f"PRIMARY KEY ({table_data.primary_key})")
         return f"CREATE TABLE {table_data.name} ({', '.join((*column_definitions, *table_constraints))}); "
 
     @staticmethod
@@ -86,16 +86,18 @@ class CppCodeGenerator:
 
     def _make_table_class_definition(self, table_from_yaml: TableFromYaml, configs: GeneralConfigs):
 
-        text = ""
-
         class_name = _Helpers._make_table_class_name(
             table_from_yaml.name,
             configs.case
         )
 
+        text = ""
+
         text += f"class {class_name} : public {PARENT_TABLE_CLASS} {{\n"
 
-        # TODO content of class
+        text += f"public: \n"
+        text += f"  explicit {class_name}(SQLite::Database& db) : {PARENT_TABLE_CLASS}(db) {{}} \n\n"
+
         text += "protected: \n"
 
         statement_texts = []
@@ -116,9 +118,8 @@ class CppCodeGenerator:
                 method_name="getDeleteTableStatement"),
         ):
             statement_texts.append(
-                f"""  static constexpr const char* {statement.constant_string_name} = \"{statement.sql_statement}\";
-  const char* {statement.method_name}() const override {{ return {statement.constant_string_name}; }}
-"""
+                f"  static constexpr const char* {statement.constant_string_name} = \"{statement.sql_statement}\";\n" +
+                f"  const char* {statement.method_name}() const override {{ return {statement.constant_string_name}; }}\n"
             )
 
         text += "\n".join(statement_texts)

@@ -14,6 +14,8 @@ function(GENERATE_OR_UPDATE_DAO)
   # Create a new library to which the user will link.
   add_library(${THIS_ARGS_USER_DAO_LIB_NAME} STATIC)
   set(USER_DAO_LIB_CPP_FILES )
+  file(TOUCH ${USER_DAO_LIB_OUTPUT_FOLDER}/${THIS_ARGS_USER_DAO_LIB_NAME}.cpp)
+  list(APPEND USER_DAO_LIB_CPP_FILES ${USER_DAO_LIB_OUTPUT_FOLDER}/${THIS_ARGS_USER_DAO_LIB_NAME}.cpp)
 
   # One C++ module per YAML file.
   # Re-generate C++ code if the YAML is newer.
@@ -21,9 +23,8 @@ function(GENERATE_OR_UPDATE_DAO)
   set(CPP_FILE_OF_CURRENT_YAML ${USER_DAO_LIB_OUTPUT_FOLDER}/${YAML_FILE_WE}.hpp)
   if (${THIS_ARGS_YAML_FILE} IS_NEWER_THAN ${CPP_FILE_OF_CURRENT_YAML})
     message("YAML is newer than C++ file, generating.")
-    set(_COMMAND ${Python3_EXECUTABLE} ${SQLiteDAO_PYTHON_ENTRY_POINT} --yaml_file=${THIS_ARGS_YAML_FILE} --output_folder=${USER_DAO_LIB_OUTPUT_FOLDER})
     execute_process(
-      COMMAND ${_COMMAND}
+      COMMAND ${Python3_EXECUTABLE} ${SQLiteDAO_PYTHON_ENTRY_POINT} --yaml_file=${THIS_ARGS_YAML_FILE} --output_folder=${USER_DAO_LIB_OUTPUT_FOLDER}
       COMMAND_ERROR_IS_FATAL ANY
     )
   endif()
@@ -32,5 +33,6 @@ function(GENERATE_OR_UPDATE_DAO)
   # Last configs of the library.
   target_sources(${THIS_ARGS_USER_DAO_LIB_NAME} PRIVATE ${USER_DAO_LIB_CPP_FILES})
   target_link_libraries(${THIS_ARGS_USER_DAO_LIB_NAME} PUBLIC xyz)
+  target_include_directories(${THIS_ARGS_USER_DAO_LIB_NAME} PUBLIC ${USER_DAO_LIB_OUTPUT_FOLDER})
 
 endfunction()

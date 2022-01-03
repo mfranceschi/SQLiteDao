@@ -11,4 +11,6 @@ std::string createTable(const std::string &tableName,
                         const ColumnList_t &columnList);
 
 std::string selectAll(const std::string &tableName);
+
+std::string listTables();
 } // namespace CommonQueries

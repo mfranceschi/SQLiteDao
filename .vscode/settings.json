@@ -63,7 +63,8 @@
     "fstream": "cpp",
     "iomanip": "cpp",
     "iostream": "cpp",
-    "istream": "cpp"
+    "istream": "cpp",
+    "*.yaml": "cpp"
   },
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
