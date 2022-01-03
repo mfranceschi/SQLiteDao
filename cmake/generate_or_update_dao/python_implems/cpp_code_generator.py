@@ -43,6 +43,29 @@ class _Helpers:
     def _drop_table(table_name: str) -> str:
         return f"DROP TABLE {table_name}; "
 
+    @staticmethod
+    def _count_all(table_name: str) -> str:
+        return f"SELECT COUNT(*) FROM {table_name}; "
+
+    @staticmethod
+    def _make_statement_cpp_code_with_override(statement: StatementData) -> str:
+        return \
+            f"  static constexpr const char* {statement.constant_string_name} = \"{statement.sql_statement}\";\n" + \
+            f"  const char* {statement.method_name}() const override{{ return {statement.constant_string_name}; }}\n"
+
+    @staticmethod
+    def _make_statement_cpp_code_without_override(statement: StatementData, public_method_name: str, public_method_return_type: str) -> str:
+        return \
+            "public:\n" + \
+            f"  {public_method_return_type} {public_method_name}() const {{\n" + \
+            f"    std::string statement = this->{statement.method_name}();\n" + \
+            f"    return db.execAndGet(statement).getInt(); \n" + \
+            f"  }}\n" + \
+            f"\n" + \
+            f"protected:\n" + \
+            f"  static constexpr const char* {statement.constant_string_name} = \"{statement.sql_statement}\";\n" + \
+            f"  const char* {statement.method_name}() const {{ return {statement.constant_string_name}; }}\n"
+
 
 class CppCodeGenerator:
 
@@ -118,8 +141,22 @@ class CppCodeGenerator:
                 method_name="getDeleteTableStatement"),
         ):
             statement_texts.append(
-                f"  static constexpr const char* {statement.constant_string_name} = \"{statement.sql_statement}\";\n" +
-                f"  const char* {statement.method_name}() const override {{ return {statement.constant_string_name}; }}\n"
+                _Helpers._make_statement_cpp_code_with_override(
+                    statement)
+            )
+
+        if "countAll" in table_from_yaml.predefined_read_queries:
+            statement = StatementData(
+                sql_statement=_Helpers._count_all(table_from_yaml.name),
+                constant_string_name="COUNT_ALL_STATEMENT",
+                method_name="getCountAllStatement"
+            )
+            statement_texts.append(
+                _Helpers._make_statement_cpp_code_without_override(
+                    statement,
+                    public_method_name="countAll",
+                    public_method_return_type="int"
+                )
             )
 
         text += "\n".join(statement_texts)
