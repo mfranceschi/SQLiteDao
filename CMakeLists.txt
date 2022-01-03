@@ -16,4 +16,7 @@ add_subdirectory(daolib)
 set(SQLiteDAO_PYTHON_ENTRY_POINT ${CMAKE_CURRENT_LIST_DIR}/cmake/generate_or_update_dao/main_program.py)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/generate_or_update_dao/function_generate_or_update_dao.cmake)
 
-add_subdirectory(tests)
+include(CTest)
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
