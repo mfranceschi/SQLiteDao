@@ -10,6 +10,7 @@ function(GENERATE_OR_UPDATE_DAO)
 
   # We will write C++ files (among others) here.
   set(USER_DAO_LIB_OUTPUT_FOLDER ${CMAKE_CURRENT_BINARY_DIR}/${THIS_ARGS_USER_DAO_LIB_NAME})
+  file(MAKE_DIRECTORY ${USER_DAO_LIB_OUTPUT_FOLDER})
 
   # Create a new library to which the user will link.
   add_library(${THIS_ARGS_USER_DAO_LIB_NAME} STATIC)
@@ -28,7 +29,6 @@ function(GENERATE_OR_UPDATE_DAO)
       COMMAND_ERROR_IS_FATAL ANY
     )
   endif()
-  list(APPEND USER_DAO_LIB_CPP_FILES ${CPP_FILE_OF_CURRENT_YAML})
 
   # Last configs of the library.
   target_sources(${THIS_ARGS_USER_DAO_LIB_NAME} PRIVATE ${USER_DAO_LIB_CPP_FILES})

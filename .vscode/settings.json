@@ -1,12 +1,8 @@
 {
-  "cmake.generator": "Unix Makefiles",
-  "cmake.configureArgs": [
-    "-DCMAKE_MAKE_PROGRAM=C:\\msys64\\mingw64\\bin\\mingw32-make.exe"
-  ],
+  "cmake.cmakePath": "C:\\Program Files\\CMake\\bin\\cmake.EXE",
   "editor.formatOnSave": true,
   "files.insertFinalNewline": true,
   "clang-tidy.buildPath": "build",
-
   "files.associations": {
     "array": "cpp",
     "atomic": "cpp",
